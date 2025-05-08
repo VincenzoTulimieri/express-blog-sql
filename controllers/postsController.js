@@ -10,14 +10,17 @@ const connection = require('../data/db.js')
 
 // index
 function index(req,res){
-    const queryTags = req.query.tags;
+    // dichiarata query
+    const sql ='SELECT * FROM posts';
 
-    if(queryTags){
-        const currentTag = posts.filter(post => post.tags.includes(queryTags))
-        res.json(currentTag)
-    }
+    // esecuzione query
+    connection.query(sql,(err, results)=>{
+        if(err){
+            return res.status(500).json({error:'Database non trovato'})
+        };
+        res.json(results);
+    });
 
-    res.json(posts);
 }
 
 // show
