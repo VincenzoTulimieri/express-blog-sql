@@ -3,6 +3,7 @@ const express = require('express')
 
 // importazione dei dati
 const posts = require('../data/posts.js');
+const connection = require('../data/db.js')
 
 // const { error } = require('console');
 
