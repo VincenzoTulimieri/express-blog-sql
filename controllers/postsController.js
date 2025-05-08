@@ -26,15 +26,29 @@ function index(req,res){
 // show
 function show(req,res){
     const currentId = parseInt(req.params.id);
-    const currentPost = posts.find(post => post.id === currentId)
-    if(!currentPost){
-        res.status(404)
-        return res.json({
-            error: 'Not found',
-            message: 'Post non trovato'
-        })
-    }
-    res.json(currentPost)
+
+
+    const postSql = 'SELECT * FROM posts WHERE id = ?'
+    connection.query(postSql,[currentId],(err,results)=>{
+        if(err){
+            return res.status(500).json({error:'Database non trovato'})
+        };
+        if(results.length === 0){
+            return res.status(404).json({error:'Post non trovato'})
+        };
+        res.json(results[0])
+    })
+
+
+    // const currentPost = posts.find(post => post.id === currentId)
+    // if(!currentPost){
+    //     res.status(404)
+    //     return res.json({
+    //         error: 'Not found',
+    //         message: 'Post non trovato'
+    //     })
+    // }
+    // res.json(currentPost)
 }
 
 // store
