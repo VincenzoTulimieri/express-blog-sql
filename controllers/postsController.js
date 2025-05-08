@@ -32,7 +32,8 @@ function show(req, res) {
     const postSql = 'SELECT * FROM posts WHERE id = ?'
     const tagSql = `
         SELECT tags.*
-        FROM tagsJOIN post_tag 
+        FROM tags
+        JOIN post_tag 
         ON tags.id = post_tag.tag_id 
         WHERE post_tag.post_id = ?;
     `
@@ -47,14 +48,14 @@ function show(req, res) {
         };
 
         const post = results[0]
-        res.json(post)
-        // connection.query(tagSql,[currentId],(err,results)=>{
-        //     if(err){
-        //         return res.status(500).json({error:'Database non trovato'})
-        //     };
-        //     post.tags= results;
-        //     res.json(post)
-        // });
+        // res.json(post)
+        connection.query(tagSql,[currentId],(err,results)=>{
+            if(err){
+                return res.status(500).json({error:'Database non trovato'})
+            };
+            post.tags= results;
+            res.json(post)
+        });
     });
 
 }
