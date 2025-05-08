@@ -9,14 +9,14 @@ const connection = require('../data/db.js')
 
 
 // index
-function index(req,res){
-    // dichiarata query
-    const sql ='SELECT * FROM posts';
+function index(req, res) {
+    // dichiarazione query
+    const sql = 'SELECT * FROM posts';
 
     // esecuzione query
-    connection.query(sql,(err, results)=>{
-        if(err){
-            return res.status(500).json({error:'Database non trovato'})
+    connection.query(sql, (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: 'Database non trovato' })
         };
         res.json(results);
     });
@@ -24,37 +24,45 @@ function index(req,res){
 }
 
 // show
-function show(req,res){
+function show(req, res) {
+    // Id dell'utente
     const currentId = parseInt(req.params.id);
 
-
+    // dichiarazione query
     const postSql = 'SELECT * FROM posts WHERE id = ?'
-    connection.query(postSql,[currentId],(err,results)=>{
-        if(err){
-            return res.status(500).json({error:'Database non trovato'})
-        };
-        if(results.length === 0){
-            return res.status(404).json({error:'Post non trovato'})
-        };
-        res.json(results[0])
-    })
+    const tagSql = `
+        SELECT tags.*
+        FROM tagsJOIN post_tag 
+        ON tags.id = post_tag.tag_id 
+        WHERE post_tag.post_id = ?;
+    `
 
+    // esecuzione query
+    connection.query(postSql, [currentId], (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: 'Database non trovato' })
+        };
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'Post non trovato' })
+        };
 
-    // const currentPost = posts.find(post => post.id === currentId)
-    // if(!currentPost){
-    //     res.status(404)
-    //     return res.json({
-    //         error: 'Not found',
-    //         message: 'Post non trovato'
-    //     })
-    // }
-    // res.json(currentPost)
+        const post = results[0]
+        res.json(post)
+        // connection.query(tagSql,[currentId],(err,results)=>{
+        //     if(err){
+        //         return res.status(500).json({error:'Database non trovato'})
+        //     };
+        //     post.tags= results;
+        //     res.json(post)
+        // });
+    });
+
 }
 
 // store
-function store(req,res){
-    const newId = posts[posts.length -1].id +1;
-    const newPost ={
+function store(req, res) {
+    const newId = posts[posts.length - 1].id + 1;
+    const newPost = {
         id: newId,
         title: req.body.title,
         content: req.body.content,
@@ -66,10 +74,10 @@ function store(req,res){
 }
 
 // update
-function update(req,res){
+function update(req, res) {
     const currentId = parseInt(req.params.id);
     const currentPost = posts.find(post => post.id === currentId)
-    if(!currentPost){
+    if (!currentPost) {
         res.status(404)
         return res.json({
             error: 'Not found',
@@ -81,51 +89,49 @@ function update(req,res){
     currentPost.tags = req.body.tags;
     console.log(posts)
     res.json(currentPost)
-    
+
 }
 
 // modify
-function modify(req,res){
+function modify(req, res) {
     const currentId = parseInt(req.params.id);
     const currentPost = posts.find(post => post.id === currentId)
-    if(!currentPost){
+    if (!currentPost) {
         res.status(404)
         return res.json({
             error: 'Not found',
             message: 'Post non trovato'
         })
     }
-    if(req.body.title){
+    if (req.body.title) {
         currentPost.title = req.body.title;
     }
-    if(req.body.content){
+    if (req.body.content) {
         currentPost.content = req.body.content;
     }
-    if(req.body.tags){
+    if (req.body.tags) {
         currentPost.tags = req.body.tags;
     }
     console.log(posts)
     res.json(currentPost)
-    
+
 }
 
 
 // destroy
-function destroy(req,res){
+function destroy(req, res) {
+    // Id dell'utente
     const currentId = parseInt(req.params.id);
-    const currentPost = posts.find(post => post.id === currentId)
-    if(!currentPost){
-        res.status(404)
-        return res.json({
-            error: 'Not found',
-            message: 'Post non trovato'
-        })
-    }
-    
-    posts.splice(posts.indexOf(currentPost),1)
-    res.sendStatus(204)
-    
+
+    // esecuzione query
+    const sql = 'DELETE FROM posts WHERE id=?'
+    connection.query(sql,[currentId],(err,results)=>{
+        if (err) {
+            return res.status(500).json({ error: 'Database non trovato' })
+        };
+        res.sendStatus(204);
+    }); 
 }
 
 // esportazione controller
-module.exports = {index,show,store,update,modify,destroy}
+module.exports = { index, show, store, update, modify, destroy }
